@@ -1,7 +1,7 @@
 <?php
     session_start();
 
-    require "facebook.php";
+    require "settings.php";
 
     $helper = $fb->getRedirectLoginHelper();
 

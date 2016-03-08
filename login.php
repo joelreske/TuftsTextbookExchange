@@ -1,12 +1,18 @@
 <?php
   session_start();
 
-  require "facebook.php";
+  require "settings.php";
 
   $helper = $fb->getRedirectLoginHelper();
 
   $permissions = ['email']; // Optional permissions
-  $loginUrl = $helper->getLoginUrl('https://tufts-textbook-exchange.com/callback.php', $permissions);
+  
+  if ($DEV){
+    $loginUrl = $helper->getLoginUrl('https://tufts-textbook-exchange.com/dev/callback.php', $permissions);
+  }else{
+    $loginUrl = $helper->getLoginUrl('https://tufts-textbook-exchange.com/callback.php', $permissions);
+  }
+  
 ?>
 
 <!DOCTYPE html>
