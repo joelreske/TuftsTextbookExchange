@@ -195,8 +195,8 @@ REQ;
 
   </body>
 
-  <script src="/js/bootstrap.min.js"></script>
-  <script src="/js/main.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/main.js"></script>
 </html>
 <?php
 else: header("Location: https://". $_SERVER['SERVER_NAME'] . "/login.php");
