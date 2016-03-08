@@ -1,5 +1,7 @@
 <?php
 session_start();
+require "settings.php";
+
 if (isset($_SESSION['fb_access_token'])): ?>
 <html>
   <head>
@@ -199,7 +201,7 @@ REQ;
   <script src="js/main.js"></script>
 </html>
 <?php
-else: header("Location: https://". $_SERVER['SERVER_NAME'] . "/login.php");
-//echo $_SERVER['SERVER_NAME'];
+
+else: header("Location: " . $_SESSION['base_url'] . "login.php");
 endif;
 ?>
