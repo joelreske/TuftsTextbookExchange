@@ -1,10 +1,18 @@
-
+<?php require "settings.php"; ?>
 
 <link href="css/header.css" rel="stylesheet">
 
 <div id="nav" class="row">
     <div class="col-md-5">
-      <h1><a href="http://tufts-textbook-exchange.com/">Tufts Textbook Exchange</a></h1>
+      <h1><a href=
+      <?php 
+        if($DEV){ 
+          echo "http://tufts-textbook-exchange.com/dev/"; 
+        }else{
+          echo "http://tufts-textbook-exchange.com/";
+        }
+      ?>
+      >Tufts Textbook Exchange</a></h1>
     </div>
     <div class="col-md-1 col-md-offset-5">
       <img id="profileImage" src="<?php echo $_SESSION['user_img']; ?>" class="img-circle">
