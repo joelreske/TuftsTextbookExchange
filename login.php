@@ -6,7 +6,7 @@
   $helper = $fb->getRedirectLoginHelper();
 
   $permissions = ['email']; // Optional permissions
-  $loginUrl = $helper->getLoginUrl("https://". $_SERVER['SERVER_NAME'] . "/callback.php", $permissions);
+  $loginUrl = $helper->getLoginUrl('https://tufts-textbook-exchange.com/callback.php', $permissions);
 ?>
 
 <!DOCTYPE html>
