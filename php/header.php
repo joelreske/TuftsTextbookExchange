@@ -4,7 +4,7 @@
 
 <div id="nav" class="row">
     <div class="col-md-5">
-      <h1><a href=<?php echo $BASE_URL ?> >Tufts Textbook Exchange</a></h1>
+      <h1><a href=<?php echo $BASE_URL . "index.php" ?> >Tufts Textbook Exchange</a></h1>
     </div>
     <div class="col-md-1 col-md-offset-5">
       <img id="profileImage" src="<?php echo $_SESSION['user_img']; ?>" class="img-circle">
