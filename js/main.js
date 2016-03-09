@@ -1,8 +1,7 @@
 $curBookId=0;
 
 $("#searchForm").submit(function(event){
-    $("#recentListings").css("display", "none");
-    $("#sellUsedBooks").css("display", "none");
+    $("#offerContainer #bookID").val($curBookId);
 });
 
 $( ".listing" ).click(function() {

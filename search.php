@@ -1,139 +1,140 @@
-<?php session_start(); ?>
+<?php 
 
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Tufts Textbook Exchange | Search</title>
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/index.css" rel="stylesheet">
-    <script src="js/jquery-2.1.4.min.js"></script>
+session_start();
 
-  </head>
-  <body>
-    <div class="container-fluid">
-      <?php include 'php/header.php'; ?>
+function displayListings($search, $title, $author, $dep, $class){
+  if($search){
+    displaySearchedListings($title, $author, $dep, $class);
+  }else{
+    displayAllListings();
+  }
+}
 
-      <div class="row">
-        <div class="col-md-8 col-md-offset-2">
-          <h4>Search for Books:</h4>
-        </div>
-      </div>
+function displaySearchedListings($title, $author, $dep, $class){
+  require 'php/db_info.php';
+  require "settings.php";
 
-      <div class="row">
-        <form id="searchForm" action="" method="post" class="col-md-8 col-md-offset-2 form">
+  $conn = new mysqli($servername, $username, $password, $dbname);
+  if ($conn->connect_error) {
+      die("Connection failed: " . $conn->connect_error);
+  }
 
-          <div class="col-md-5 col-md-offset-1">
-            <div class="col-md-4">Title:</div>
-            <div class="col-md-8"><input type="text" name="title" placeholder="Moby Dick"></div>
-          </div>
+  //echo "Searching for: '" . $searchString . "' ";
 
-          <div class="col-md-5 col-md-offset-1">
-            <div class="col-md-4">Author:</div>
-            <div class="col-md-8"><input type="text" name="author" placeholder="Herman Melville"></div>
-          </div>
+  if($title == ""){$title = "qqqqqqq";} 
+  if($author == ""){$author = "qqqqqqq";} 
+  if($dep == ""){$dep = "qqqqqqq";} 
+  if($class == ""){$class = "qqqqqqq";} 
 
-          <div class="col-md-5 col-md-offset-1">
-            <div class="col-md-4">Department:</div>
-            <div class="col-md-8"><input type="text" name="department" placeholder="COMP"></div>
-          </div>
-
-          <div class="col-md-5 col-md-offset-1">
-            <div class="col-md-4">Class:</div>
-            <div class="col-md-8"><input type="text" name="class"  placeholder="0040"></div>
-          </div>
-
-          <div class="col-md-4 col-md-offset-4">
-            <input class="button" type="submit" name="searchBooks" value="Search">
-          </div>
-        </div>
-      </div>
-
-      <span id="recentListings">
-        <div class="row">
-          <div class="col-md-8 col-md-offset-2">
-            <h4>Search Results:</h4>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-md-8 col-md-offset-2 listing ">
-            <div class="col-xs-12 heading">
-              <div id="title" class="col-xs-5">Title</div>
-              <div id="author" class="col-xs-4">Author</div>
-              <div id="price"class="col-xs-3">Price</div>
-            </div>
-          </div>
-        </div>
-
-    <?php
-
-    include 'php/db_info.php';
-
-    if(isset($_POST['searchBooks'])){
-        $conn = new mysqli($servername, $username, $password, $dbname);
-        if ($conn->connect_error) {
-            die("Connection failed: " . $conn->connect_error);
-        }
-
-        $searchString = $_POST['title'];
-        $sql = <<<EOD
-        SELECT books.title, books.author, books.department, books.class,books.timePosted, books.price, users.first FROM books INNER JOIN users ON books.sellerID = users.ID
-        WHERE books.title LIKE '%$searchString%'
-        ORDER BY CASE WHEN books.title = '$searchString' THEN 0
-                    WHEN books.title LIKE '$searchString%' THEN 1
-                    WHEN books.title LIKE '%$searchString%' THEN 2
-                    WHEN books.title LIKE '%$searchString' THEN 3
-        ELSE 4
-        END, books.title ASC
+  $sql = <<<EOD
+  SELECT listing.title, listing.author, listing.department, listing.class, listing.timestamp_listed, listing.price, user.first FROM listing INNER JOIN user ON listing.seller_id = user.user_id
+  WHERE listing.title LIKE '%$title%' 
+      OR listing.author LIKE '%$author%' 
+      OR listing.department LIKE '%$dep%' 
+      OR listing.class LIKE '%$class%'
+  ORDER BY CASE 
+        WHEN listing.title = '$title' THEN 0
+        WHEN listing.title LIKE '$title%' THEN 1
+        WHEN listing.title LIKE '%$title%' THEN 2
+        WHEN listing.title LIKE '%$title' THEN 3
+        WHEN listing.author = '$author' THEN 0
+        WHEN listing.author LIKE '%$author' THEN 1
+        WHEN listing.author LIKE '%$author%' THEN 2
+        WHEN listing.author LIKE '%$author' THEN 3
+        WHEN listing.department = '$dep' THEN 0
+        WHEN listing.department LIKE '%$dep' THEN 1
+        WHEN listing.department LIKE '%$dep%' THEN 2
+        WHEN listing.department LIKE '%$dep' THEN 3
+        WHEN listing.class = '$class' THEN 0
+        WHEN listing.class LIKE '%$class' THEN 1
+        WHEN listing.class LIKE '%$class%' THEN 2
+        WHEN listing.class LIKE '%$class' THEN 3
+  ELSE 4
+  
+  END
 EOD;
 
-        $result = $conn->query($sql);
-        if ($result->num_rows > 0) {
-            echo "<div class='row'>";
-            while($row = $result->fetch_assoc()) {
-                $moneyFormat = money_format('%(#2n', $row['price']);
-                echo <<<EOT
-                    <div class="col-md-8 col-md-offset-2 listing">
-                      <div class="col-xs-12 mainInfo">
-                        <div class="col-xs-5">{$row['title']}</div>
-                        <div class="col-xs-4">{$row['author']}</div>
-                        <div class="col-xs-2">$ {$moneyFormat}</div>
-                        <div id="tab" class="col-xs-1">
-                          <span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>
-                        </div>
-                      </div>
-                      <div class="col-xs-12 secondaryInfoHeader">
-                        <div class="col-xs-5">Class</div>
-                        <div class="col-xs-4">Date Posted</div>
-                        <div class="col-xs-3">Seller</div>
-                      </div>
-                      <div class="col-xs-12 secondaryInfo">
-                        <div class="col-xs-5">{$row['department']}-{$row['class']}</div>
-                        <div class="col-xs-4">{$row['timePosted']}</div>
-                        <div class="col-xs-3">{$row['first']}</div>
-                      </div> 
-                    </div>
-EOT;
-            }
-            echo "</div>";
-        } else {
-            echo "0 results";
-        }
-        $conn->close();
-    }
+  $result = $conn->query($sql);
+  if ($result->num_rows > 0) {
+      echo "<div class='row'>";
+      while($row = $result->fetch_assoc()) {
+
+          $moneyFormat = money_format('%(#2n', $row['price']);
+          echo generateRow($row['title'], $row['author'], $row['price'], $glyph, $row['listing_id'], 
+            $row['department'], $row['class'], $row['timestamp_listed'], $row['first']);
+
+      }
+      echo "</div>";
+  } else {
+      echo "0 results";
+  }
+  $conn->close();
+}
+
+function displayAllListings(){
+  require 'php/db_info.php';
+  require "settings.php";
+
+  $conn = new mysqli($servername, $username, $password, $dbname);
+  $sql = 'SELECT listing.title, listing.listing_id, listing.author, listing.department, listing.class,listing.timestamp_listed,listing.price, user.first FROM listing INNER JOIN user ON listing.seller_id = user.user_id';
+  $result = $conn->query($sql);
+
+  $conn->close();
+
+  if ($result->num_rows > 0) {
+
+      echo "<div class='row'>";
+      while ($row = $result->fetch_assoc()) {
+          
+          $sql =<<<SE
+            SELECT book_id, buyer_id, amount FROM offer WHERE book_id={$row["listing_id"]} AND buyer_id='{$_SESSION["user_id"]}'
+SE;
+
+          $conn = new mysqli($servername, $username, $password, $dbname);
+
+          $glyph = "glyphicon-send";
+          if ($conn->query($sql) !== false && $conn->query($sql)->num_rows > 0){
+            $glyph = "glyphicon-ok";
+          }
+          $conn->close();
+          
+          echo generateRow($row['title'], $row['author'], $row['price'], $glyph, $row['listing_id'],
+              $row['department'], $row['class'], $row['timestamp_listed'], $row['first']);
+          
+      }
+  }
+}
+
+function generateRow($title, $author, $price, $glyph, $ID, $dep, $class, $time, $name){
+
+  $moneyFormat = money_format('%(#2n', $price);
+          setlocale(LC_MONETARY, 'en_US');
+
+  return <<<EOD
+          
+          <div class="col-md-8 col-md-offset-2 listing clearfix">
+            <div class="col-xs-12 mainInfo">
+              <div class="col-xs-5">{$title}</div>
+              <div class="col-xs-4">{$author}</div>
+              <div class="col-xs-2">$ {$moneyFormat}</div>
+              <div class="col-xs-1 tab">
+                <span class="glyphicon {$glyph}" aria-hidden="true" data-book-id="{$ID}"></span>
+              </div>
+            </div>
+            <div class="col-xs-12 secondaryInfoHeader">
+              <div class="col-xs-5">Class</div>
+              <div class="col-xs-4">Date Posted</div>
+              <div class="col-xs-3">Seller</div>
+            </div>
+            <div class="col-xs-12 secondaryInfo">
+              <div class="col-xs-5">{$dep}-{$class}</div>
+              <div class="col-xs-4">{$time}</div>
+              <div class="col-xs-3">{$name}</div>
+            </div> 
+          </div>
+EOD;
+
+}
+
 ?>
-      </span>
-
-    </div>
-    
-
-  </body>
-  
-  <script src="js/bootstrap.min.js"></script>
-  <script src="js/main.js"></script>
-
-
-</html>
 

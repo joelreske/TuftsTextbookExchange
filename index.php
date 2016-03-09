@@ -1,8 +1,13 @@
 <?php
 session_start();
-require "settings.php";
 
-if (isset($_SESSION['fb_access_token'])): ?>
+if (isset($_SESSION['fb_access_token'])):
+
+require "settings.php";
+require 'search.php';
+require 'php/make_offer.php';
+
+  ?>
 <html>
   <head>
     <meta charset="utf-8">
@@ -50,7 +55,7 @@ if (isset($_SESSION['fb_access_token'])): ?>
           </div>
 
           <div class="col-md-4 col-md-offset-4">
-            <input class="button" type="submit" name="searchBooks" value="Search">
+            <input class="button" type="submit" name="" value="Search">
           </div>
         </form>
       </div>
@@ -73,55 +78,23 @@ if (isset($_SESSION['fb_access_token'])): ?>
         </div>
 
         <?php
-            include 'php/db_info.php';
+          $search = true;
+          
+          $title = $_POST['title'];
+          $author = $_POST['author'];
+          $dep = $_POST['department'];
+          $class = $_POST['class'];
 
-            $conn = new mysqli($servername, $username, $password, $dbname);
-            $sql = 'SELECT listing.title, listing.listing_id, listing.author, listing.department, listing.class,listing.timestamp_listed,listing.price, user.first FROM listing INNER JOIN user ON listing.seller_id = user.user_id';
-            $result = $conn->query($sql);
-            $conn->close();
+          if($title.$author.$dep.$class == ""){
+            $search = false;
+          }
 
-            if ($result->num_rows > 0) {
-                echo "<div class='row'>";
-                while ($row = $result->fetch_assoc()) {
-                    $moneyFormat = money_format('%(#2n', $row['price']);
-                    setlocale(LC_MONETARY, 'en_US');
-                    
-                    $sql =<<<SE
-                      SELECT book_id, buyer_id, amount FROM offer WHERE book_id={$row["listing_id"]} AND buyer_id='{$_SESSION["user_id"]}'
-SE;
-                    $conn = new mysqli($servername, $username, $password, $dbname);
-                    $glyph = "glyphicon-send";
-                    if ($conn->query($sql) !== false && $conn->query($sql)->num_rows > 0){
-                      $glyph = "glyphicon-ok";
-                    }
-                    $conn->close();
-                    
-                    echo <<<EOD
-                    
-                    <div class="col-md-8 col-md-offset-2 listing clearfix">
-                      <div class="col-xs-12 mainInfo">
-                        <div class="col-xs-5">{$row['title']}</div>
-                        <div class="col-xs-4">{$row['author']}</div>
-                        <div class="col-xs-2">$ {$moneyFormat}</div>
-                        <div class="col-xs-1 tab">
-                          <span class="glyphicon {$glyph}" aria-hidden="true" data-book-id="{$row['listing_id']}"></span>
-                        </div>
-                      </div>
-                      <div class="col-xs-12 secondaryInfoHeader">
-                        <div class="col-xs-5">Class</div>
-                        <div class="col-xs-4">Date Posted</div>
-                        <div class="col-xs-3">Seller</div>
-                      </div>
-                      <div class="col-xs-12 secondaryInfo">
-                        <div class="col-xs-5">{$row['department']}-{$row['class']}</div>
-                        <div class="col-xs-4">{$row['timestamp_listed']}</div>
-                        <div class="col-xs-3">{$row['first']}</div>
-                      </div> 
-                    </div>
-EOD;
-                }
-            }
-            
+          /*echo "Searching... \n title: {$title} \n author: {$author} \n" .
+                               "department: {$dep} \n class: {$class} \n";
+          */
+
+          displayListings($search, $title, $author, $dep, $class); 
+
         ?>
       </span>
       
@@ -150,49 +123,10 @@ EOD;
 
       <?php 
         if(isset($_POST['makeOffer'])){
-
-          include 'php/db_info.php';
-
-          $conn = new mysqli($servername, $username, $password, $dbname);
-          
-          $sql =<<<REQ
-          SELECT listing.title, user.user_id, user.first, user.last, user.email FROM listing INNER JOIN user ON listing.seller_id = user.user_id WHERE listing.listing_id = '{$_POST['bookID']}' 
-REQ;
-          $result = $conn->query($sql);
-          $row = $result->fetch_assoc();
-          
-          $message =<<<MES
-            {$_SESSION['user_name']} made an offer for your book with ID = '{$_POST['bookID']}'.
-
-            Their message is:
-            '{$_POST['message']}'
-
-            Their offer is:
-            ${$_POST['price']}
-
-            <a href="http://tufts-textbook-exchange.com/responce.php?BOOK_ID={$_POST['bookID']}&BUYER_ID={$_SESSION['user_id']}">Click here to accept this offer.</a>
-MES;
-
-          $message = wordwrap($message, 70, "\r\n");
-          $to =<<<EMA
-            '{$row['first']} {$row['last']}' <{$row['email']}>
-EMA;
-
-          $subject = 'Someone Made an Offer on your Textbook!';
-          $headers = "From: " . "'Tufts Textbook Exchange' <no-reply@tufts-textbook-exchange.com>" . "\r\n";
-          $headers .= "MIME-Version: 1.0\r\n";
-          $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-
-          mail($to, $subject, $message, $headers);
-
-          $sql =<<<REQ
-            INSERT INTO offer (book_id, buyer_id, amount)
-            VALUES ({$_POST['bookID']}, '{$row['user_id']}', {$_POST['price']})
-REQ;
-          echo $sql;
-          $result = $conn->query($sql);
+          make_offer();
         }
-?>
+      ?>
+
     </div>
 
   </body>
