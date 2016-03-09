@@ -53,13 +53,16 @@ function displaySearchedListings($title, $author, $dep, $class){
   
   END
 EOD;
-
+  
   $result = $conn->query($sql);
   if ($result->num_rows > 0) {
       echo "<div class='row'>";
       while($row = $result->fetch_assoc()) {
-
-          $moneyFormat = money_format('%(#2n', $row['price']);
+        
+          $glyph = "glyphicon-send";
+          if ($conn->query($sql) !== false && $conn->query($sql)->num_rows > 0){
+            $glyph = "glyphicon-ok";
+          }
           echo generateRow($row['title'], $row['author'], $row['price'], $glyph, $row['listing_id'], 
             $row['department'], $row['class'], $row['timestamp_listed'], $row['first']);
 
