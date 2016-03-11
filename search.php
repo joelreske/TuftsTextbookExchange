@@ -76,7 +76,6 @@ EOD;
 
 function displayAllListings(){
   require 'php/db_info.php';
-  require "settings.php";
 
   $conn = new mysqli($servername, $username, $password, $dbname);
   $sql = 'SELECT listing.title, listing.listing_id, listing.author, listing.department, listing.class,listing.timestamp_listed,listing.price, user.first FROM listing INNER JOIN user ON listing.seller_id = user.user_id';

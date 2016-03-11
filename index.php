@@ -89,10 +89,6 @@ require 'php/make_offer.php';
             $search = false;
           }
 
-          /*echo "Searching... \n title: {$title} \n author: {$author} \n" .
-                               "department: {$dep} \n class: {$class} \n";
-          */
-
           displayListings($search, $title, $author, $dep, $class); 
 
         ?>
@@ -136,6 +132,6 @@ require 'php/make_offer.php';
 </html>
 <?php
 
-else: header("Location: " . $_SESSION['base_url'] . "login.php");
+else: header("Location: login.php");
 endif;
 ?>

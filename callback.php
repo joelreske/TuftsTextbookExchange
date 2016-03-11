@@ -93,9 +93,9 @@ EOD;
     
 
     if ($DEV){
-        header("Location: https://". $_SERVER['SERVER_NAME'] . "/dev/index.php");
+        header("Location: index.php");
     }else{
-        header("Location: https://". $_SERVER['SERVER_NAME'] . "/index.php");
+        header("Location: index.php");
     }
     
     $conn->close();
